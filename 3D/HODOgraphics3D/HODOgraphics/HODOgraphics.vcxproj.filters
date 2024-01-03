@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="0_default">
+      <UniqueIdentifier>{14bb7582-05f5-4694-b4e4-5fa63402e3e5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="1_Entry">
+      <UniqueIdentifier>{5361d058-2a8a-46c6-8440-8baac60af285}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2_System">
+      <UniqueIdentifier>{63f8e4ef-c86a-456b-94cf-922fd53af82d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2_System\TimeSystem">
+      <UniqueIdentifier>{beb3175d-b2d9-434d-909b-c00c9a121b60}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2_System\InputSystem">
+      <UniqueIdentifier>{d3c62b02-c3e2-4884-a772-41f35c575edb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2_System\RenderSystem">
+      <UniqueIdentifier>{dbafa009-1b5c-4da6-8c79-f8adf45b9fb5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="2_System\UISystem%28imgui%29">
+      <UniqueIdentifier>{687b8b06-4947-4514-b606-4b68ffc89926}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="targetver.h">
+      <Filter>0_default</Filter>
+    </ClInclude>
+    <ClInclude Include="framework.h">
+      <Filter>0_default</Filter>
+    </ClInclude>
+    <ClInclude Include="Resource.h">
+      <Filter>0_default</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.h">
+      <Filter>1_Entry</Filter>
+    </ClInclude>
+    <ClInclude Include="TimeSystem.h">
+      <Filter>2_System\TimeSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="InputSystem.h">
+      <Filter>2_System\InputSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="RenderSystem.h">
+      <Filter>2_System\RenderSystem</Filter>
+    </ClInclude>
+    <ClInclude Include="UISystem.h">
+      <Filter>2_System\UISystem%28imgui%29</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="small.ico">
+      <Filter>0_default</Filter>
+    </Image>
+    <Image Include="HODOgraphics.ico">
+      <Filter>0_default</Filter>
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="HODOgraphics.rc">
+      <Filter>0_default</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Entry.cpp">
+      <Filter>1_Entry</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.cpp">
+      <Filter>1_Entry</Filter>
+    </ClCompile>
+    <ClCompile Include="TimeSystem.cpp">
+      <Filter>2_System\TimeSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="InputSystem.cpp">
+      <Filter>2_System\InputSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="RenderSystem.cpp">
+      <Filter>2_System\RenderSystem</Filter>
+    </ClCompile>
+    <ClCompile Include="UISystem.cpp">
+      <Filter>2_System\UISystem%28imgui%29</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>
