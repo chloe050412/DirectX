@@ -6,7 +6,8 @@ Application::Application()
 	: buffer(L"test"),
 	_appName(buffer),
 	_timeSystem(TimeSystem::GetInstance()),
-	_inputSystem(InputSystem::GetInstance())
+	_inputSystem(InputSystem::GetInstance()),
+	_renderSystem(RenderSystem::GetInstance())
 {
 
 }
@@ -22,6 +23,7 @@ void Application::Initialize()
 	MyRegisterClass(ins);
 	InitInstance(ins);
 
+	_renderSystem->Initialize(_hWnd, _screenWidth, _screenHeight);
 	_timeSystem->Initialize();
 	_inputSystem->Initialize(_hWnd, ins, _screenWidth, _screenHeight);
 }
@@ -45,8 +47,8 @@ void Application::Loop()
 
 void Application::Finalize()
 {
+	_renderSystem->Finalize();
 	_inputSystem->Finalize();
-	int test = 0;
 }
 
 BOOL Application::InitInstance(HINSTANCE hInstance)
@@ -108,6 +110,7 @@ LRESULT CALLBACK Application::WndProc(HWND hWnd, UINT message, WPARAM wParam, LP
 
 void Application::Run()
 {
+	_renderSystem->Update();
 	_timeSystem->Update();
 	_inputSystem->Update();
 

@@ -36,6 +36,6 @@ private:
 private:
 	TimeSystem* _timeSystem;
 	InputSystem* _inputSystem;
-
+	RenderSystem* _renderSystem;
 };
 
