@@ -5,6 +5,8 @@
 Application::Application()
 	: buffer(L"test"),
 	_appName(buffer),
+	_screenWidth(800),
+	_screenHeight(600),
 	_timeSystem(TimeSystem::GetInstance()),
 	_inputSystem(InputSystem::GetInstance()),
 	_renderSystem(RenderSystem::GetInstance())
@@ -53,8 +55,15 @@ void Application::Finalize()
 
 BOOL Application::InitInstance(HINSTANCE hInstance)
 {
-	_hWnd = CreateWindowW(_appName, _appName, WS_OVERLAPPEDWINDOW,
-		CW_USEDEFAULT, 0, CW_USEDEFAULT, 0, nullptr, nullptr, hInstance, nullptr);
+	_hWnd = CreateWindowW(_appName, 
+		_appName, 
+		WS_OVERLAPPEDWINDOW,
+		300, 300, 
+		_screenWidth, _screenHeight, 
+		nullptr, 
+		nullptr, 
+		hInstance, 
+		nullptr);
 
 	if (!_hWnd)
 	{
@@ -87,7 +96,7 @@ ATOM Application::MyRegisterClass(HINSTANCE hInstance)
 	wcex.hInstance = hInstance;
 	wcex.hIcon = NULL;
 	wcex.hCursor = LoadCursor(nullptr, IDC_ARROW);
-	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
+	wcex.hbrBackground = (HBRUSH)(COLOR_WINDOW);
 	wcex.lpszMenuName = NULL;
 	wcex.lpszClassName = _appName;
 	wcex.hIconSm = NULL;
@@ -110,7 +119,7 @@ LRESULT CALLBACK Application::WndProc(HWND hWnd, UINT message, WPARAM wParam, LP
 
 void Application::Run()
 {
-	_renderSystem->Update();
+	_renderSystem->Update(false);
 	_timeSystem->Update();
 	_inputSystem->Update();
 
