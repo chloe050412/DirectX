@@ -3,6 +3,7 @@
 #include <windows.h>
 #include "TimeSystem.h"
 #include "InputSystem.h"
+#include "RenderSystem.h"
 
 class Application
 {
