@@ -7,6 +7,7 @@ Application::Application()
 	_appName(buffer),
 	_screenWidth(800),
 	_screenHeight(600),
+	_isFullscreen(false),
 	_timeSystem(TimeSystem::GetInstance()),
 	_inputSystem(InputSystem::GetInstance()),
 	_renderSystem(RenderSystem::GetInstance())
@@ -55,14 +56,15 @@ void Application::Finalize()
 
 BOOL Application::InitInstance(HINSTANCE hInstance)
 {
-	_hWnd = CreateWindowW(_appName, 
-		_appName, 
-		WS_OVERLAPPEDWINDOW,
-		300, 300, 
-		_screenWidth, _screenHeight, 
-		nullptr, 
-		nullptr, 
-		hInstance, 
+	_hWnd = CreateWindowW(
+		_appName,
+		_appName,
+		WS_EX_TOPMOST | WS_POPUP,
+		300, 300,
+		_screenWidth, _screenHeight,
+		nullptr,
+		nullptr,
+		hInstance,
 		nullptr);
 
 	if (!_hWnd)
@@ -119,9 +121,36 @@ LRESULT CALLBACK Application::WndProc(HWND hWnd, UINT message, WPARAM wParam, LP
 
 void Application::Run()
 {
-	_renderSystem->Update(false);
+	_renderSystem->Update();
 	_timeSystem->Update();
 	_inputSystem->Update();
+
+	if (_inputSystem->GetKeyDown(DIK_F))
+	{
+		if (_isFullscreen == false)
+		{
+			// 스크린 전체 사이즈를 가져온다
+			_screenWidth = GetSystemMetrics(SM_CXSCREEN);
+			_screenHeight = GetSystemMetrics(SM_CYSCREEN);
+
+			SetWindowPos(_hWnd, NULL, 0, 0, _screenWidth, _screenHeight, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
+
+			_renderSystem->ChangeFullScreenMode(_screenWidth, _screenHeight);
+
+			_isFullscreen = true;
+		}
+		else
+		{
+			_screenWidth = DEFAULT_WIDTH;
+			_screenHeight = DEFAULT_HEIGHT;
+
+			SetWindowPos(_hWnd, NULL, 200, 200, _screenWidth, _screenHeight, 0);
+
+			_renderSystem->ChangeFullScreenMode(_screenWidth, _screenHeight);
+
+			_isFullscreen = false;
+		}
+	}
 
 	float x = _inputSystem->GetMouseXpos();
 	float y = _inputSystem->GetMouseYpos();
