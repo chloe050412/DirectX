@@ -30,9 +30,16 @@ void RenderSystem::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 	StartDx();
 }
 
-void RenderSystem::Update()
+void RenderSystem::Update(bool isFullScreen)
 {
+	_isFullscreen = isFullScreen;
+
 	BeginRender();
+
+	if (GetAsyncKeyState('F'))
+	{
+		ChangeFullScreenMode();
+	}
 }
 
 void RenderSystem::Finalize()
@@ -120,44 +127,64 @@ void RenderSystem::FinishDx()
 	_deviceContext->Release();
 }
 
-void RenderSystem::ChangeFullScreenMode(int screenWidth, int screenHeight)
+void RenderSystem::ChangeFullScreenMode()
 {
-	_screenWidth = screenWidth;
-	_screenHeight = screenHeight;
+	_swapChain->SetFullscreenState(true, NULL);
 
-	// 기존 렌더 타겟을 지운다
-	_deviceContext->OMSetRenderTargets(0, NULL, NULL);
-	_renderTarget->Release();
+	// 윈도우 사이즈를 다시 가져온다
+	RECT rect;
 
-	// 백 버퍼의 사이즈를 조절한다
-	_swapChain->ResizeBuffers(1,
-		_screenWidth,
-		_screenHeight,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		0);
+	GetClientRect(_hWnd, &rect);
 
-	// 렌더 타겟을 다시 생성한다
-	// 그림을 그릴 백 버퍼의 주소 가져오기
-	ID3D11Texture2D* pbackBuffer;
-	// 스왑 체인의 백 버퍼를 가져와 텍스처 객체에 할당
-	_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pbackBuffer);
+	_screenWidth = rect.right - rect.left;
+	_screenHeight = rect.bottom - rect.top;
 
-	// 백 버퍼 주소를 이용해 렌더 타겟 생성하기
-	_device->CreateRenderTargetView(pbackBuffer, NULL, _renderTarget.GetAddressOf());
-	pbackBuffer->Release();
+	//// 기존 렌더 타겟을 지운다
+	//_deviceContext->OMSetRenderTargets(0, NULL, NULL);
+	//_renderTarget->Release();
 
-	// 렌더 타겟을 백 버퍼로 설정하기
-	_deviceContext->OMSetRenderTargets(1, _renderTarget.GetAddressOf(), NULL);
+	//// 백 버퍼의 사이즈를 조절한다
+	//_swapChain->ResizeBuffers(1,
+	//	_screenWidth,
+	//	_screenHeight,
+	//	DXGI_FORMAT_R8G8B8A8_UNORM,
+	//	0);
 
-	// 뷰포트 설정
-	D3D11_VIEWPORT viewport;
-	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+	//// 렌더 타겟을 다시 생성한다
+	//// 그림을 그릴 백 버퍼의 주소 가져오기
+	//ID3D11Texture2D* pbackBuffer;
+	//// 스왑 체인의 백 버퍼를 가져와 텍스처 객체에 할당
+	//_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pbackBuffer);
 
-	viewport.TopLeftX = 0;
-	viewport.TopLeftY = 0;
-	viewport.Width = _screenWidth;
-	viewport.Height = _screenHeight;
+	//// 백 버퍼 주소를 이용해 렌더 타겟 생성하기
+	//_device->CreateRenderTargetView(pbackBuffer, NULL, _renderTarget.GetAddressOf());
+	//pbackBuffer->Release();
 
-	_deviceContext->RSSetViewports(1, &viewport);
+	//// 렌더 타겟을 백 버퍼로 설정하기
+	//_deviceContext->OMSetRenderTargets(1, _renderTarget.GetAddressOf(), NULL);
+
+	//// 뷰포트 설정
+	//D3D11_VIEWPORT viewport;
+	//ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
+
+	//viewport.TopLeftX = 0;
+	//viewport.TopLeftY = 0;
+	//viewport.Width = _screenWidth;
+	//viewport.Height = _screenHeight;
+
+	//_deviceContext->RSSetViewports(1, &viewport);
+
+	// 스왑 체인을 위한 데이터 구조체 세팅
+	DXGI_MODE_DESC desc;
+
+	desc.Width = _screenWidth;
+	desc.Height = _screenHeight;
+	desc.RefreshRate.Numerator = 60;
+	desc.RefreshRate.Denominator = 1;
+	desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+	desc.ScanlineOrdering = DXGI_MODE_SCANLINE_ORDER_UNSPECIFIED;
+	desc.Scaling = DXGI_MODE_SCALING_UNSPECIFIED;
+
+	_swapChain->ResizeTarget(&desc);
 
 }

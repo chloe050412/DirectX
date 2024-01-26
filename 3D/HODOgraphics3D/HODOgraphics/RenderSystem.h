@@ -18,21 +18,22 @@ private:
 
 public:
 	void Initialize(HWND hWnd, int screenWidth, int screenHeight);
-	void Update();
+	void Update(bool isFullScreen);
 	void Finalize();
-	void ChangeFullScreenMode(int screenWidth, int screenHeight);
 
 private:
 	void StartDx();
 	void BeginRender();
 	void EndRender();
 	void FinishDx();
+	void ChangeFullScreenMode();
 
 private:
 	HWND							_hWnd;
 
 	int								_screenWidth;
 	int								_screenHeight;
+	bool							_isFullscreen;
 
 	ComPtr<ID3D11Device>			_device;
 	ComPtr<ID3D11DeviceContext>     _deviceContext;
