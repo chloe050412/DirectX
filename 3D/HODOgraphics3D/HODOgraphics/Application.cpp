@@ -59,7 +59,7 @@ BOOL Application::InitInstance(HINSTANCE hInstance)
 	_hWnd = CreateWindowW(
 		_appName,
 		_appName,
-		WS_EX_TOPMOST | WS_POPUP,
+		WS_OVERLAPPEDWINDOW | WS_POPUP,
 		300, 300,
 		_screenWidth, _screenHeight,
 		nullptr,
@@ -133,8 +133,7 @@ void Application::Run()
 			_screenWidth = GetSystemMetrics(SM_CXSCREEN);
 			_screenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-			SetWindowPos(_hWnd, NULL, 0, 0, _screenWidth, _screenHeight, SWP_NOSIZE | SWP_NOMOVE | SWP_NOZORDER | SWP_NOACTIVATE | SWP_FRAMECHANGED);
-
+			SetWindowPos(_hWnd, NULL, 0, 0, _screenWidth, _screenHeight, 0);
 			_renderSystem->ChangeFullScreenMode(_screenWidth, _screenHeight);
 
 			_isFullscreen = true;

@@ -22,6 +22,12 @@
     <Filter Include="2_System\UISystem%28imgui%29">
       <UniqueIdentifier>{687b8b06-4947-4514-b606-4b68ffc89926}</UniqueIdentifier>
     </Filter>
+    <Filter Include="3_Camera">
+      <UniqueIdentifier>{cbd2b5e4-96ad-439c-a0e6-5e56cca8ca5f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="4_Helper">
+      <UniqueIdentifier>{d80f4466-1d0d-492f-ab23-547c6efcf907}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -48,6 +54,16 @@
     <ClInclude Include="UISystem.h">
       <Filter>2_System\UISystem%28imgui%29</Filter>
     </ClInclude>
+    <ClInclude Include="Test.h">
+      <Filter>4_Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Axis.h">
+      <Filter>4_Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Grid.h">
+      <Filter>4_Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="small.ico">
@@ -81,5 +97,15 @@
     <ClCompile Include="UISystem.cpp">
       <Filter>2_System\UISystem%28imgui%29</Filter>
     </ClCompile>
+    <ClCompile Include="Test.cpp">
+      <Filter>4_Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Axis.cpp">
+      <Filter>4_Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Grid.cpp">
+      <Filter>4_Helper</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp" />
   </ItemGroup>
 </Project>
