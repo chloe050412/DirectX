@@ -5,6 +5,9 @@
 #include "InputSystem.h"
 #include "RenderSystem.h"
 
+#define DEFAULT_WIDTH 800
+#define DEFAULT_HEIGHT 600
+
 class Application
 {
 public:
@@ -26,6 +29,7 @@ private:
 	MSG _msg;
 	int _screenWidth;
 	int _screenHeight;
+	bool _isFullscreen;
 	const WCHAR* _appName;
 
 	wchar_t buffer[30];
