@@ -1,8 +1,9 @@
 #pragma once
-#include <d3d11.h>
+#include "HDd3d.h"
 #include <wrl.h>
-
-#pragma comment(lib, "d3d11.lib")
+#include "Model.h"
+#include "Shader.h"
+#include "Camera.h"
 
 using namespace Microsoft::WRL;
 
@@ -39,6 +40,12 @@ private:
 	ComPtr<IDXGISwapChain>			_swapChain;
 
 	ComPtr<ID3D11RenderTargetView>  _renderTarget;
+
+	//test
+
+	Model* _model;
+	Shader* _shader;
+	Camera* _camera;
 
 };
 

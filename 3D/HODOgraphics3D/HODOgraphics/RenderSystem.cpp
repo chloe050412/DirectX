@@ -1,5 +1,6 @@
 #include "RenderSystem.h"
 
+
 RenderSystem* RenderSystem::_system = nullptr;
 
 RenderSystem::RenderSystem()
@@ -28,6 +29,15 @@ void RenderSystem::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 	_screenHeight = screenHeight;
 
 	StartDx();
+
+	_camera = new Camera();
+	_camera->SetPosition(0.f, 0.f, -10.f);
+
+	_model = new Model();
+	_model->Initialize(_device.Get());
+
+	_shader = new Shader();
+	_shader->Initialzie(_device.Get(), hWnd);
 }
 
 void RenderSystem::Update()
@@ -37,6 +47,10 @@ void RenderSystem::Update()
 
 void RenderSystem::Finalize()
 {
+	_shader->Finalize();
+	_model->Finalize();
+	delete _camera;
+
 	FinishDx();
 }
 
@@ -90,15 +104,29 @@ void RenderSystem::StartDx()
 
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = _screenWidth;
-	viewport.Height = _screenHeight;
+	viewport.Width = (float)_screenWidth;
+	viewport.Height = (float)_screenHeight;
 
 	_deviceContext->RSSetViewports(1, &viewport);
 }
 
 void RenderSystem::BeginRender()
 {
+	Matrix worldMatrix, viewMatrix, projectionMatrix;
+	bool result;
+
 	float color[4] = { 0.f, 0.2f, 0.4f, 1.0f };
+
+
+	_camera->Render();
+
+	_camera->GetViewMatrix(viewMatrix);
+
+
+	_model->Render(_deviceContext.Get());
+	_shader->Render(_deviceContext.Get(), _model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
+
+
 
 	_deviceContext->ClearRenderTargetView(_renderTarget.Get(), color);
 
@@ -155,8 +183,8 @@ void RenderSystem::ChangeFullScreenMode(int screenWidth, int screenHeight)
 
 	viewport.TopLeftX = 0;
 	viewport.TopLeftY = 0;
-	viewport.Width = _screenWidth;
-	viewport.Height = _screenHeight;
+	viewport.Width = (float)_screenWidth;
+	viewport.Height = (float)_screenHeight;
 
 	_deviceContext->RSSetViewports(1, &viewport);
 

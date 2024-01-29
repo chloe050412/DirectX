@@ -28,6 +28,12 @@
     <Filter Include="4_Helper">
       <UniqueIdentifier>{d80f4466-1d0d-492f-ab23-547c6efcf907}</UniqueIdentifier>
     </Filter>
+    <Filter Include="5_Resource">
+      <UniqueIdentifier>{365ec7c6-aaf4-4832-9cc4-7fec6648c5cc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="6_Header">
+      <UniqueIdentifier>{bb3a1806-f4a9-454b-a60f-8a375c01815e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="targetver.h">
@@ -54,16 +60,21 @@
     <ClInclude Include="UISystem.h">
       <Filter>2_System\UISystem%28imgui%29</Filter>
     </ClInclude>
-    <ClInclude Include="Test.h">
+    <ClInclude Include="Camera.h">
+      <Filter>3_Camera</Filter>
+    </ClInclude>
+    <ClInclude Include="HDmath.h">
+      <Filter>6_Header</Filter>
+    </ClInclude>
+    <ClInclude Include="HDd3d.h">
+      <Filter>6_Header</Filter>
+    </ClInclude>
+    <ClInclude Include="Model.h">
       <Filter>4_Helper</Filter>
     </ClInclude>
-    <ClInclude Include="Axis.h">
-      <Filter>4_Helper</Filter>
+    <ClInclude Include="Shader.h">
+      <Filter>5_Resource</Filter>
     </ClInclude>
-    <ClInclude Include="Grid.h">
-      <Filter>4_Helper</Filter>
-    </ClInclude>
-    <ClInclude Include="Camera.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="small.ico">
@@ -97,15 +108,27 @@
     <ClCompile Include="UISystem.cpp">
       <Filter>2_System\UISystem%28imgui%29</Filter>
     </ClCompile>
-    <ClCompile Include="Test.cpp">
+    <ClCompile Include="Camera.cpp">
+      <Filter>3_Camera</Filter>
+    </ClCompile>
+    <ClCompile Include="Model.cpp">
       <Filter>4_Helper</Filter>
     </ClCompile>
-    <ClCompile Include="Axis.cpp">
-      <Filter>4_Helper</Filter>
+    <ClCompile Include="Shader.cpp">
+      <Filter>5_Resource</Filter>
     </ClCompile>
-    <ClCompile Include="Grid.cpp">
-      <Filter>4_Helper</Filter>
-    </ClCompile>
-    <ClCompile Include="Camera.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="PixelShader.hlsl">
+      <Filter>5_Resource</Filter>
+    </FxCompile>
+    <FxCompile Include="VertexShader.hlsl">
+      <Filter>5_Resource</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config">
+      <Filter>0_default</Filter>
+    </None>
   </ItemGroup>
 </Project>
