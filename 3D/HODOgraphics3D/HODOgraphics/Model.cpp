@@ -1,4 +1,5 @@
-#include "Model.h"
+﻿#include "Model.h"
+using namespace DirectX;
 
 Model::Model()
 	:_vertexBuffer(nullptr), _indexBuffer(nullptr),
@@ -59,8 +60,8 @@ bool Model::InitializeBuffers(ID3D11Device* device)
 	HRESULT result;
 
 	// set vertex, index buffer size
-	_vertexCount = 3;
-	_indexCount = 3;
+	_vertexCount = 4;
+	_indexCount = 6;
 
 	// create vertex array
 	vertices = new VertexType[_vertexCount];
@@ -77,19 +78,26 @@ bool Model::InitializeBuffers(ID3D11Device* device)
 	}
 
 	// fill vertex buffer with value
-	vertices[0].position = Vector3(-1.f, -1.f, 0.f);
-	vertices[0].color = Vector4(1.f, 0.f, 0.f, 1.f);
+	vertices[0].position = XMFLOAT3(-1.0f, -1.0f, 0.0f);
+	vertices[0].color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
-	vertices[1].position = Vector3(0.f, 1.f, 0.f);
-	vertices[1].color = Vector4(1.f, 0.f, 0.f, 1.f);
+	vertices[1].position = XMFLOAT3(-1.0f, 1.0f, 0.0f);
+	vertices[1].color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
-	vertices[2].position = Vector3(1.f, -1.f, 0.f);
-	vertices[2].color = Vector4(1.f, 0.f, 0.f, 1.f);
+	vertices[2].position = XMFLOAT3(1.0f, 1.0f, 0.0f);
+	vertices[2].color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
+
+	vertices[3].position = XMFLOAT3(1.0f, -1.0f, 0.0f);
+	vertices[3].color = XMFLOAT4(1.0f, 0.0f, 0.0f, 1.0f);
 
 	// fill index buffer with value
 	indices[0] = 0;
 	indices[1] = 1;
 	indices[2] = 2;
+	indices[3] = 2;
+	indices[4] = 3;
+	indices[5] = 0;
+
 
 	// set vertex buffer type desc
 	vertexBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -146,7 +154,7 @@ void Model::RenderBuffers(ID3D11DeviceContext* dc)
 	stride = sizeof(VertexType);
 	offset = 0;
 
-	dc->IAGetVertexBuffers(0, 1, &_vertexBuffer, &stride, &offset);
+	dc->IASetVertexBuffers(0, 1, &_vertexBuffer, &stride, &offset);
 	dc->IASetIndexBuffer(_indexBuffer, DXGI_FORMAT_R32_UINT, 0);
 	dc->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 

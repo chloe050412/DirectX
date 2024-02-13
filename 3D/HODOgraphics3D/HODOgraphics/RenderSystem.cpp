@@ -1,4 +1,4 @@
-#include "RenderSystem.h"
+ï»¿#include "RenderSystem.h"
 
 
 RenderSystem* RenderSystem::_system = nullptr;
@@ -34,15 +34,23 @@ void RenderSystem::Initialize(HWND hWnd, int screenWidth, int screenHeight)
 	_camera->SetPosition(0.f, 0.f, -10.f);
 
 	_model = new Model();
-	_model->Initialize(_device.Get());
+	if (!_model->Initialize(_device.Get()))
+	{
+		MessageBox(_hWnd, L"CouldÂ notÂ initializeÂ theÂ modelÂ object.", L"Error", MB_OK);
+	}
 
 	_shader = new Shader();
-	_shader->Initialzie(_device.Get(), hWnd);
+	if (!_shader->Initialzie(_device.Get(), _hWnd))
+	{
+		MessageBox(_hWnd, L"CouldÂ notÂ initializeÂ theÂ shaderÂ object.", L"Error", MB_OK);
+	}
 }
 
 void RenderSystem::Update()
 {
 	BeginRender();
+	Render();
+	EndRender();
 }
 
 void RenderSystem::Finalize()
@@ -56,29 +64,31 @@ void RenderSystem::Finalize()
 
 void RenderSystem::StartDx()
 {
-	// ½º¿Ò Ã¼ÀÎÀ» À§ÇÑ µ¥ÀÌÅÍ ±¸Á¶Ã¼ ¼¼ÆÃ
+	// ìŠ¤ì™‘ ì²´ì¸ì„ ìœ„í•œ ë°ì´í„° êµ¬ì¡°ì²´ ì„¸íŒ…
 	DXGI_SWAP_CHAIN_DESC swapChainDesc;
 
 	ZeroMemory(&swapChainDesc, sizeof(DXGI_SWAP_CHAIN_DESC));
 
-	swapChainDesc.BufferCount = 1;                           // ¹é ¹öÆÛ °³¼ö
-	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;   // 32bit ÄÃ·¯ »ç¿ë
+	swapChainDesc.BufferCount = 1;                           // ë°± ë²„í¼ ê°œìˆ˜
+	swapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;   // 32bit ì»¬ëŸ¬ ì‚¬ìš©
 	swapChainDesc.BufferDesc.Width = _screenWidth;
 	swapChainDesc.BufferDesc.Height = _screenHeight;
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;   // ½º¿Ò Ã¼ÀÎÀ» ¹éÆÛ¹ö(·»´õ Å¸°Ù) Ãâ·ÂÀ¸·Î »ç¿ëÇÒ °ÍÀÓ
-	swapChainDesc.OutputWindow = _hWnd;                        // ¾î´À À©µµ¿ì·Î ³»º¸³¾ °ÍÀÎÁö
-	swapChainDesc.SampleDesc.Count = 4;                        // ¸ÖÆ¼ »ùÇÃ ´Ü°è¿¡¼­ÀÇ ÇÈ¼¿ ¼ö
-	swapChainDesc.Windowed = true;                           // window ÇüÅÂÀÎÁö, Ç® ½ºÅ©¸°ÀÎÁö
-	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // Ç® ½ºÅ©¸° ½ºÀ§ÄªÀ» Çã¿ëÇÑ´Ù
+	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;   // ìŠ¤ì™‘ ì²´ì¸ì„ ë°±í¼ë²„(ë Œë” íƒ€ê²Ÿ) ì¶œë ¥ìœ¼ë¡œ ì‚¬ìš©í•  ê²ƒì„
+	swapChainDesc.OutputWindow = _hWnd;                        // ì–´ëŠ ìœˆë„ìš°ë¡œ ë‚´ë³´ë‚¼ ê²ƒì¸ì§€
+	swapChainDesc.SampleDesc.Count = 4;                        // ë©€í‹° ìƒ˜í”Œ ë‹¨ê³„ì—ì„œì˜ í”½ì…€ ìˆ˜
+	swapChainDesc.Windowed = true;                           // window í˜•íƒœì¸ì§€, í’€ ìŠ¤í¬ë¦°ì¸ì§€
+	swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH; // í’€ ìŠ¤í¬ë¦° ìŠ¤ìœ„ì¹­ì„ í—ˆìš©í•œë‹¤
 
-	// µğ¹ÙÀÌ½º, µğ¹ÙÀÌ½º ÄÁÅØ½ºÆ®, ½º¿Ò Ã¼ÀÎ »ı¼º
+	D3D_FEATURE_LEVEL featureLevel = D3D_FEATURE_LEVEL_11_0;
+
+	// ë””ë°”ì´ìŠ¤, ë””ë°”ì´ìŠ¤ ì»¨í…ìŠ¤íŠ¸, ìŠ¤ì™‘ ì²´ì¸ ìƒì„±
 	D3D11CreateDeviceAndSwapChain(
 		NULL,
 		D3D_DRIVER_TYPE_HARDWARE,
 		NULL,
 		NULL,
-		NULL,
-		NULL,
+		&featureLevel,
+		1,
 		D3D11_SDK_VERSION,
 		&swapChainDesc,
 		_swapChain.GetAddressOf(),
@@ -86,19 +96,97 @@ void RenderSystem::StartDx()
 		NULL,
 		_deviceContext.GetAddressOf());
 
-	// ±×¸²À» ±×¸± ¹é ¹öÆÛÀÇ ÁÖ¼Ò °¡Á®¿À±â
+	// ê·¸ë¦¼ì„ ê·¸ë¦´ ë°± ë²„í¼ì˜ ì£¼ì†Œ ê°€ì ¸ì˜¤ê¸°
 	ID3D11Texture2D* pbackBuffer;
-	// ½º¿Ò Ã¼ÀÎÀÇ ¹é ¹öÆÛ¸¦ °¡Á®¿Í ÅØ½ºÃ³ °´Ã¼¿¡ ÇÒ´ç
+	// ìŠ¤ì™‘ ì²´ì¸ì˜ ë°± ë²„í¼ë¥¼ ê°€ì ¸ì™€ í…ìŠ¤ì²˜ ê°ì²´ì— í• ë‹¹
 	_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pbackBuffer);
 
-	// ¹é ¹öÆÛ ÁÖ¼Ò¸¦ ÀÌ¿ëÇØ ·»´õ Å¸°Ù »ı¼ºÇÏ±â
+	// ë°± ë²„í¼ ì£¼ì†Œë¥¼ ì´ìš©í•´ ë Œë” íƒ€ê²Ÿ ìƒì„±í•˜ê¸°
 	_device->CreateRenderTargetView(pbackBuffer, NULL, _renderTarget.GetAddressOf());
 	pbackBuffer->Release();
 
-	// ·»´õ Å¸°ÙÀ» ¹é ¹öÆÛ·Î ¼³Á¤ÇÏ±â
+	//Â ê¹Šì´Â ë²„í¼Â êµ¬ì¡°ì²´ë¥¼Â ì´ˆê¸°í™”Â í•©ë‹ˆë‹¤.
+	D3D11_TEXTURE2D_DESC depthBufferDesc;
+	ZeroMemory(&depthBufferDesc, sizeof(depthBufferDesc));
+
+	//Â ê¹Šì´Â ë²„í¼Â êµ¬ì¡°ì²´ë¥¼Â ì‘ì„±í•©ë‹ˆë‹¤.
+	depthBufferDesc.Width = _screenWidth;
+	depthBufferDesc.Height = _screenHeight;
+	depthBufferDesc.MipLevels = 1;
+	depthBufferDesc.ArraySize = 1;
+	depthBufferDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthBufferDesc.SampleDesc.Count = 1;
+	depthBufferDesc.SampleDesc.Quality = 0;
+	depthBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+	depthBufferDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
+	depthBufferDesc.CPUAccessFlags = 0;
+	depthBufferDesc.MiscFlags = 0;
+
+	//Â ì„¤ì •ëœÂ ê¹Šì´ë²„í¼Â êµ¬ì¡°ì²´ë¥¼Â ì‚¬ìš©í•˜ì—¬Â ê¹Šì´Â ë²„í¼Â í…ìŠ¤ì³ë¥¼Â ìƒì„±í•œë‹¤.
+	_device->CreateTexture2D(&depthBufferDesc, NULL, _depthStencilBuffer.GetAddressOf());
+
+	//Â ìŠ¤í…ì‹¤Â ìƒíƒœÂ êµ¬ì¡°ì²´ë¥¼Â ì´ˆê¸°í™”Â í•©ë‹ˆë‹¤.
+	D3D11_DEPTH_STENCIL_DESC depthStencilDesc;
+	ZeroMemory(&depthStencilDesc, sizeof(depthStencilDesc));
+
+	//Â ìŠ¤í…ì‹¤Â ìƒíƒœÂ êµ¬ì¡°ì²´ë¥¼Â ì‘ì„±í•©ë‹ˆë‹¤.
+	depthStencilDesc.DepthEnable = true;
+	depthStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+	depthStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+
+	depthStencilDesc.StencilEnable= true;
+	depthStencilDesc.StencilReadMask = 0xFF;
+	depthStencilDesc.StencilWriteMask = 0xFF;
+
+	//Â í”½ì…€Â ì •ë©´ì˜Â ìŠ¤í…ì‹¤Â ì„¤ì •ì…ë‹ˆë‹¤.
+	depthStencilDesc.FrontFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilDepthFailOp = D3D11_STENCIL_OP_INCR;
+	depthStencilDesc.FrontFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.FrontFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	//Â í”½ì…€Â ë’·ë©´ì˜Â ìŠ¤í…ì‹¤Â ì„¤ì •ì…ë‹ˆë‹¤.
+	depthStencilDesc.BackFace.StencilFailOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilDepthFailOp = D3D11_STENCIL_OP_DECR;
+	depthStencilDesc.BackFace.StencilPassOp = D3D11_STENCIL_OP_KEEP;
+	depthStencilDesc.BackFace.StencilFunc = D3D11_COMPARISON_ALWAYS;
+
+	//Â ê¹Šì´Â ìŠ¤í…ì‹¤Â ìƒíƒœë¥¼Â ì„¤ì •í•©ë‹ˆë‹¤.
+	_deviceContext->OMSetDepthStencilState(_depthStencilState.Get(), 1);
+
+	//Â ê¹Šì´Â ìŠ¤í…ì‹¤Â ë·°ì˜Â êµ¬ì¡°ì²´ë¥¼Â ì´ˆê¸°í™”í•©ë‹ˆë‹¤.
+	D3D11_DEPTH_STENCIL_VIEW_DESC depthStencilViewDesc;
+	ZeroMemory(&depthStencilViewDesc, sizeof(depthStencilViewDesc));
+
+	//Â ê¹Šì´Â ìŠ¤í…ì‹¤Â ë·°Â êµ¬ì¡°ì²´ë¥¼Â ì„¤ì •í•œë‹¤.
+	depthStencilViewDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	depthStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+	depthStencilViewDesc.Texture2D.MipSlice = 0;
+
+	//Â ê¹Šì´Â ìŠ¤í…ì‹¤Â ë·°ë¥¼Â ìƒì„±í•œë‹¤.
+	_device->CreateDepthStencilView(_depthStencilBuffer.Get(), &depthStencilViewDesc, _depthStencilView.GetAddressOf());
+
+	// ë Œë” íƒ€ê²Ÿì„ ë°± ë²„í¼ë¡œ ì„¤ì •í•˜ê¸°
 	_deviceContext->OMSetRenderTargets(1, _renderTarget.GetAddressOf(), NULL);
 
-	// ºäÆ÷Æ® ¼³Á¤
+	//Â ê·¸ë ¤ì§€ëŠ”Â í´ë¦¬ê³¤ê³¼Â ë°©ë²•ì„Â ê²°ì •í• Â ë ˆìŠ¤í„°Â êµ¬ì¡°ì²´ë¥¼Â ì„¤ì •í•œë‹¤.
+	D3D11_RASTERIZER_DESC rasterDesc;
+	rasterDesc.AntialiasedLineEnable = false;
+	rasterDesc.CullMode = D3D11_CULL_BACK;
+	rasterDesc.DepthBias = 0;
+	rasterDesc.DepthBiasClamp = 0.0f;
+	rasterDesc.DepthClipEnable = true;
+	rasterDesc.FillMode = D3D11_FILL_SOLID;
+	rasterDesc.FrontCounterClockwise = false;
+	rasterDesc.MultisampleEnable = false;
+	rasterDesc.ScissorEnable = false;
+	rasterDesc.SlopeScaledDepthBias = 0.0f;
+
+	_device->CreateRasterizerState(&rasterDesc, _rasterState.GetAddressOf());
+
+	//Â ì´ì œÂ ë ˆìŠ¤í„°Â ë¼ì´ì €Â ìƒíƒœë¥¼Â ì„¤ì •í•œë‹¤.
+	_deviceContext->RSSetState(_rasterState.Get());
+
+	// ë·°í¬íŠ¸ ì„¤ì •
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 
@@ -108,39 +196,50 @@ void RenderSystem::StartDx()
 	viewport.Height = (float)_screenHeight;
 
 	_deviceContext->RSSetViewports(1, &viewport);
+
+	//Â íˆ¬ì˜Â í–‰ë ¬ì„Â ì„¤ì •í•œë‹¤.
+	float fieldOfView = 3.141592654 / 4.0f;
+	float screenAspect = static_cast<float>(_screenWidth) / static_cast<float>(_screenHeight);
+
+	//Â 3DÂ ë Œë”ë§ì„Â ìœ„í•¸Â íˆ¬ì˜Â í–‰ë ¬ì„Â ë§Œë“ ë‹¤.
+	_projectionMatrix = DirectX::XMMatrixPerspectiveFovLH(fieldOfView, screenAspect, 0.1f, 1000.f);
+
+	//Â ì„¸ê³„Â í–‰ë ¬ì„Â í•­ë™Â í–‰ë ¬ë¡œÂ ì´ˆê¸°í™”Â í•œë‹¤.
+	_worldMatrix = DirectX::XMMatrixIdentity();
+
+	//Â 2Dë Œë”ë§ì„ìœ„í•œÂ ì§êµÂ íˆ¬ì˜Â í–‰ë ¬ì„Â ë§Œë“ ë‹¤.
+	_orthoMatrix = DirectX::XMMatrixOrthographicLH(static_cast<float>(_screenWidth), static_cast<float>(_screenHeight), 0.1f, 1000.f);
 }
 
 void RenderSystem::BeginRender()
 {
-	Matrix worldMatrix, viewMatrix, projectionMatrix;
-	bool result;
-
 	float color[4] = { 0.f, 0.2f, 0.4f, 1.0f };
+	_deviceContext->ClearRenderTargetView(_renderTarget.Get(), color);
+	_deviceContext->ClearDepthStencilView(_depthStencilView.Get(), D3D11_CLEAR_DEPTH, 1.f, 0);
+}
 
-
+void RenderSystem::Render()
+{
 	_camera->Render();
 
-	_camera->GetViewMatrix(viewMatrix);
+	Matrix worldMatrix, viewMatrix, projectionMatrix;
 
+	worldMatrix = _worldMatrix;
+	projectionMatrix = _projectionMatrix;
+	_camera->GetViewMatrix(viewMatrix);
 
 	_model->Render(_deviceContext.Get());
 	_shader->Render(_deviceContext.Get(), _model->GetIndexCount(), worldMatrix, viewMatrix, projectionMatrix);
-
-
-
-	_deviceContext->ClearRenderTargetView(_renderTarget.Get(), color);
-
-	_swapChain->Present(0, 0);
 }
 
 void RenderSystem::EndRender()
 {
-
+	_swapChain->Present(0, 0);
 }
 
 void RenderSystem::FinishDx()
 {
-	// À©µµ¿ì ¸ğµå·Î ¸ÕÀú ÀüÈ¯ÇÑ µÚ Á¾·á
+	// ìœˆë„ìš° ëª¨ë“œë¡œ ë¨¼ì € ì „í™˜í•œ ë’¤ ì¢…ë£Œ
 	_swapChain->SetFullscreenState(false, NULL); 
 
 	_swapChain->Release();
@@ -153,31 +252,31 @@ void RenderSystem::ChangeFullScreenMode(int screenWidth, int screenHeight)
 	_screenWidth = screenWidth;
 	_screenHeight = screenHeight;
 
-	// ±âÁ¸ ·»´õ Å¸°ÙÀ» Áö¿î´Ù
+	// ê¸°ì¡´ ë Œë” íƒ€ê²Ÿì„ ì§€ìš´ë‹¤
 	_deviceContext->OMSetRenderTargets(0, NULL, NULL);
 	_renderTarget->Release();
 
-	// ¹é ¹öÆÛÀÇ »çÀÌÁî¸¦ Á¶ÀıÇÑ´Ù
+	// ë°± ë²„í¼ì˜ ì‚¬ì´ì¦ˆë¥¼ ì¡°ì ˆí•œë‹¤
 	_swapChain->ResizeBuffers(1,
 		_screenWidth,
 		_screenHeight,
 		DXGI_FORMAT_R8G8B8A8_UNORM,
 		0);
 
-	// ·»´õ Å¸°ÙÀ» ´Ù½Ã »ı¼ºÇÑ´Ù
-	// ±×¸²À» ±×¸± ¹é ¹öÆÛÀÇ ÁÖ¼Ò °¡Á®¿À±â
+	// ë Œë” íƒ€ê²Ÿì„ ë‹¤ì‹œ ìƒì„±í•œë‹¤
+	// ê·¸ë¦¼ì„ ê·¸ë¦´ ë°± ë²„í¼ì˜ ì£¼ì†Œ ê°€ì ¸ì˜¤ê¸°
 	ID3D11Texture2D* pbackBuffer;
-	// ½º¿Ò Ã¼ÀÎÀÇ ¹é ¹öÆÛ¸¦ °¡Á®¿Í ÅØ½ºÃ³ °´Ã¼¿¡ ÇÒ´ç
+	// ìŠ¤ì™‘ ì²´ì¸ì˜ ë°± ë²„í¼ë¥¼ ê°€ì ¸ì™€ í…ìŠ¤ì²˜ ê°ì²´ì— í• ë‹¹
 	_swapChain->GetBuffer(0, __uuidof(ID3D11Texture2D), (LPVOID*)&pbackBuffer);
 
-	// ¹é ¹öÆÛ ÁÖ¼Ò¸¦ ÀÌ¿ëÇØ ·»´õ Å¸°Ù »ı¼ºÇÏ±â
+	// ë°± ë²„í¼ ì£¼ì†Œë¥¼ ì´ìš©í•´ ë Œë” íƒ€ê²Ÿ ìƒì„±í•˜ê¸°
 	_device->CreateRenderTargetView(pbackBuffer, NULL, _renderTarget.GetAddressOf());
 	pbackBuffer->Release();
 
-	// ·»´õ Å¸°ÙÀ» ¹é ¹öÆÛ·Î ¼³Á¤ÇÏ±â
+	// ë Œë” íƒ€ê²Ÿì„ ë°± ë²„í¼ë¡œ ì„¤ì •í•˜ê¸°
 	_deviceContext->OMSetRenderTargets(1, _renderTarget.GetAddressOf(), NULL);
 
-	// ºäÆ÷Æ® ¼³Á¤
+	// ë·°í¬íŠ¸ ì„¤ì •
 	D3D11_VIEWPORT viewport;
 	ZeroMemory(&viewport, sizeof(D3D11_VIEWPORT));
 

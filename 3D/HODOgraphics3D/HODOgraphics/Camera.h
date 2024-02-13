@@ -20,6 +20,7 @@ public:
 private:
 	Vector3 _position;
 	Vector3 _rotation;
+
 	Matrix _viewMatrix;
 };
 
