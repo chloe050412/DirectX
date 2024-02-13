@@ -1,4 +1,5 @@
-#include "Shader.h"
+﻿#include "Shader.h"
+#include <fstream>
 
 Shader::Shader()
 	: _vertexShader(nullptr), _pixelShader(nullptr),
@@ -21,10 +22,12 @@ Shader::~Shader()
 
 bool Shader::Initialzie(ID3D11Device* device, HWND hWnd)
 {
+	_hWnd = hWnd;
+
 	bool result;
 
 	// init vertex shader and pixel shader
-	result = InitializeShader(device, hWnd, L"../x64/Debug/VertexShader.cso", L"../x64/Debug/PixelShader.cso");
+	result = InitializeShader(device, hWnd, L"VertexShader.hlsl", L"PixelShader.hlsl");
 	if (!result)
 	{
 		return false;
@@ -57,30 +60,58 @@ void Shader::Finalize()
 
 bool Shader::InitializeShader(ID3D11Device* device, HWND hWnd, const WCHAR* vertexShader, const WCHAR* pixelShader)
 {
-	HRESULT result = true;
+	HRESULT result = TRUE;
 	ID3D10Blob* errorMessage;
 	ID3D10Blob* vertexShaderBuffer;
 	ID3D10Blob* pixelShaderBuffer;
-	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
+
 	unsigned int numElements;
-	D3D11_BUFFER_DESC matrixBufferDesc;
 
 	// init all pointer
 	errorMessage = nullptr;
 	vertexShaderBuffer = nullptr;
 	pixelShaderBuffer = nullptr;
 
+	std::ifstream vertexShaderFile(vertexShader);
+	std::ifstream pixelShaderFile(pixelShader);
+	if (!vertexShaderFile.good() || !pixelShaderFile.good())
+	{
+		MessageBox(_hWnd, L"Gateway error", vertexShader, MB_OK);
+	}
+
 	result = D3DCompileFromFile(vertexShader,
-		NULL, 
-		NULL, 
+		0, 
+		0, 
 		"main",  // entry point
 		"vs_5_0", 
-		D3D10_SHADER_ENABLE_STRICTNESS,
+		0,
 		0, 
-		NULL, 
+		&vertexShaderBuffer,
 		&errorMessage);
 
-	if (FAILED(result)) return false;
+	if (FAILED(result))
+	{
+		char* compileErrors = (char*)(errorMessage->GetBufferPointer());
+		MessageBox(_hWnd, L"Error compiling shader.", vertexShader, MB_OK);
+		return false;
+	}
+
+	result = D3DCompileFromFile(pixelShader,
+		0,
+		0,
+		"main",  // entry point
+		"ps_5_0",
+		0,
+		0,
+		&pixelShaderBuffer,
+		&errorMessage);
+
+	if (FAILED(result))
+	{
+		char* compileErrors = (char*)(errorMessage->GetBufferPointer());
+		MessageBox(_hWnd, L"Error compiling shader.", pixelShader, MB_OK);
+		return false;
+	}
 
 	result = device->CreateVertexShader(vertexShaderBuffer->GetBufferPointer(),
 		vertexShaderBuffer->GetBufferSize(),
@@ -96,6 +127,9 @@ bool Shader::InitializeShader(ID3D11Device* device, HWND hWnd, const WCHAR* vert
 
 	if (FAILED(result)) return false;
 
+	// vertex input layout
+	// this option must be same with VertexType of Model and shader
+	D3D11_INPUT_ELEMENT_DESC polygonLayout[2];
 	polygonLayout[0].SemanticName = "POSITION";
 	polygonLayout[0].SemanticIndex = 0;
 	polygonLayout[0].Format = DXGI_FORMAT_R32G32B32A32_FLOAT;
@@ -114,6 +148,7 @@ bool Shader::InitializeShader(ID3D11Device* device, HWND hWnd, const WCHAR* vert
 
 	numElements = sizeof(polygonLayout) / sizeof(polygonLayout[0]);
 
+	// vertex input layout
 	result = device->CreateInputLayout(polygonLayout,
 		numElements,
 		vertexShaderBuffer->GetBufferPointer(),
@@ -129,6 +164,7 @@ bool Shader::InitializeShader(ID3D11Device* device, HWND hWnd, const WCHAR* vert
 	pixelShaderBuffer = 0;
 
 	// description for constant buffer
+	D3D11_BUFFER_DESC matrixBufferDesc;
 	matrixBufferDesc.Usage = D3D11_USAGE_DYNAMIC;
 	matrixBufferDesc.ByteWidth = sizeof(MatrixBufferType);
 	matrixBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
@@ -176,19 +212,18 @@ void Shader::FinalizeShader()
 bool Shader::SetShaderParameters(ID3D11DeviceContext* dc, Matrix world, Matrix view, Matrix proj)
 {
 	HRESULT result;
-	D3D11_MAPPED_SUBRESOURCE mappedResource;
-	MatrixBufferType* dataPtr;
-	unsigned int bufferNumber;
 
 	world.Transpose(world);
 	view.Transpose(view);
 	proj.Transpose(proj);
 
+	D3D11_MAPPED_SUBRESOURCE mappedResource;
 	result = dc->Map(_matrixBuffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mappedResource);
 	
 	if (FAILED(result)) return false;
 
-	dataPtr = (MatrixBufferType*)mappedResource.pData;
+	MatrixBufferType* dataPtr;
+	dataPtr = reinterpret_cast<MatrixBufferType*>(mappedResource.pData);
 
 	dataPtr->world = world;
 	dataPtr->view = view;
@@ -196,6 +231,7 @@ bool Shader::SetShaderParameters(ID3D11DeviceContext* dc, Matrix world, Matrix v
 
 	dc->Unmap(_matrixBuffer, 0);
 
+	unsigned int bufferNumber;
 	bufferNumber = 0;
 
 	dc->VSSetConstantBuffers(bufferNumber, 1, &_matrixBuffer);
@@ -205,9 +241,14 @@ bool Shader::SetShaderParameters(ID3D11DeviceContext* dc, Matrix world, Matrix v
 
 void Shader::RenderShader(ID3D11DeviceContext* dc, int indexCount)
 {
+	// input layout
 	dc->IASetInputLayout(_layout);
+
+	// shader
 	dc->VSSetShader(_vertexShader, NULL, 0);
 	dc->PSSetShader(_pixelShader, NULL, 0);
+
+	// draw
 	dc->DrawIndexed(indexCount, 0, 0);
 
 	return;

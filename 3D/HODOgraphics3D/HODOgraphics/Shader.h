@@ -31,6 +31,8 @@ public:
 	void RenderShader(ID3D11DeviceContext*, int);
 
 private:
+	HWND _hWnd;
+
 	ID3D11VertexShader* _vertexShader;
 	ID3D11PixelShader* _pixelShader;
 	ID3D11InputLayout* _layout;

@@ -75,6 +75,12 @@
     <ClInclude Include="Shader.h">
       <Filter>5_Resource</Filter>
     </ClInclude>
+    <ClInclude Include="Text.h">
+      <Filter>4_Helper</Filter>
+    </ClInclude>
+    <ClInclude Include="HDd2d.h">
+      <Filter>6_Header</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include="small.ico">
@@ -116,6 +122,9 @@
     </ClCompile>
     <ClCompile Include="Shader.cpp">
       <Filter>5_Resource</Filter>
+    </ClCompile>
+    <ClCompile Include="Text.cpp">
+      <Filter>4_Helper</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
